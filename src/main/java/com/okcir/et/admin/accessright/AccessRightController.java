@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/access-rights")
@@ -22,5 +23,12 @@ public class AccessRightController {
   public ResponseEntity<ApiResponse<List<AccessRightResponseDto>>> getAllAccessRights() {
     List<AccessRightResponseDto> accessRights = accessRightService.getAllAccessRights();
     return ResponseEntity.ok(ApiResponse.success(accessRights));
+  }
+
+  // ── GET /by-category ─────────────────────────────────
+  @GetMapping("/by-category")
+  public ResponseEntity<ApiResponse<Map<String, List<AccessRightResponseDto>>>> getAccessRightsByCategory() {
+    Map<String, List<AccessRightResponseDto>> byCategory = accessRightService.getAccessRightsByCategory();
+    return ResponseEntity.ok(ApiResponse.success(byCategory));
   }
 }

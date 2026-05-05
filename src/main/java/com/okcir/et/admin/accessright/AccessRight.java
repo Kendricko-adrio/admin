@@ -28,4 +28,10 @@ public class AccessRight {
 
   @Column(length = 255)
   private String description;
+
+  @Column(name = "parent_code", length = 100)
+  private String parentCode;
+
+  @Column(name = "category", length = 50)
+  private String category;
 }
