@@ -104,6 +104,8 @@ public class GroupService {
             .id(ar.getId())
             .code(ar.getCode())
             .description(ar.getDescription())
+            .parentCode(ar.getParentCode())
+            .category(ar.getCategory())
             .build())
         .toList();
 

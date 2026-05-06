@@ -14,4 +14,6 @@ public class AccessRightResponseDto {
   private Long id;
   private String code;
   private String description;
+  private String parentCode;
+  private String category;
 }
