@@ -93,14 +93,6 @@ public class GroupService {
           "Access Right(s) not found with id(s): " + missingIds);
     }
 
-    // Only leaf nodes can be assigned to groups
-    for (AccessRight ar : found) {
-      if (accessRightRepository.existsByParentCode(ar.getCode())) {
-        throw new IllegalArgumentException(
-            "Access Right '" + ar.getCode() + "' is not a leaf and cannot be assigned to a group");
-      }
-    }
-
     return new HashSet<>(found);
   }
 

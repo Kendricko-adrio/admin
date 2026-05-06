@@ -9,6 +9,4 @@ import java.util.List;
 public interface AccessRightRepository extends JpaRepository<AccessRight, Long> {
 
   List<AccessRight> findAllByOrderByCodeAsc();
-
-  boolean existsByParentCode(String parentCode);
 }
