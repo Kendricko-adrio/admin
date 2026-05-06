@@ -33,4 +33,5 @@ INSERT INTO access_rights (code, description, parent_code, category) VALUES
     ('ADMIN.USER.CREATE_UPDATE_DELETE', 'Create/Update/Delete','ADMIN.USER',             'ADMIN'),
     ('ADMIN.ACCESS_RIGHT',              'Access Right',        'ADMIN',                  'ADMIN'),
     ('ADMIN.ACCESS_RIGHT.VIEW',         'View',                'ADMIN.ACCESS_RIGHT',     'ADMIN'),
-    ('ADMIN.ACCESS_RIGHT.CREATE_UPDATE_DELETE', 'Create/Update/Delete', 'ADMIN.ACCESS_RIGHT', 'ADMIN');
+    ('ADMIN.ACCESS_RIGHT.CREATE_UPDATE_DELETE', 'Create/Update/Delete', 'ADMIN.ACCESS_RIGHT', 'ADMIN')
+ON CONFLICT (code) DO NOTHING;

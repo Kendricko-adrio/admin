@@ -18,7 +18,7 @@ public class AccessRightService {
 
   @Transactional(readOnly = true)
   public List<AccessRightResponseDto> getAllAccessRights() {
-    return accessRightRepository.findAll().stream()
+    return accessRightRepository.findAllByOrderByCodeAsc().stream()
         .map(this::toResponseDto)
         .toList();
   }
@@ -28,7 +28,7 @@ public class AccessRightService {
     return accessRightRepository.findAllByOrderByCodeAsc().stream()
         .map(this::toResponseDto)
         .collect(Collectors.groupingBy(
-            AccessRightResponseDto::getCategory,
+            ar -> ar.getCategory() != null ? ar.getCategory() : "UNCATEGORIZED",
             LinkedHashMap::new,
             Collectors.toList()
         ));
