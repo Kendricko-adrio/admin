@@ -33,8 +33,11 @@ spring:
 
 # ── Auth / JWT ───────────────────────────────────────
 auth:
-  is-ldap: false # true = LDAP simulation, false = username-only
+  is-ldap: false  # true = LDAP (not yet implemented), false = username-only (check DB)
 
 jwt:
   secret: "YourBase64EncodedSecretKeyThatIsAtLeast256BitsLong!!"
-  expiration: 3600 # seconds (1 hour)
+  expiration: 900              # seconds (15 minutes)
+  refresh-expiration: 604800   # seconds (7 days)
+  issuer: "auth.yourdomain.com"
+  audience: "api.yourdomain.com"
