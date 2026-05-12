@@ -39,6 +39,13 @@ public class GlobalExceptionHandler {
         .body(ApiResponse.error(409, ex.getMessage()));
   }
 
+  // ── 400 – Illegal argument ──────────────────────────
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex) {
+    return ResponseEntity.badRequest()
+        .body(ApiResponse.error(400, ex.getMessage()));
+  }
+
   // ── 401 – Authentication failure ────────────────────
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ApiResponse<Object>> handleAuthentication(AuthenticationException ex) {
