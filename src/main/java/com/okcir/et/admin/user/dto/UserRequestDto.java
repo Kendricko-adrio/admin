@@ -27,4 +27,6 @@ public class UserRequestDto {
   @NotBlank(message = "Email is required")
   @Email(message = "Email must be a valid email address")
   private String email;
+
+  private String group;
 }

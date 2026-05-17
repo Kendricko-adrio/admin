@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
@@ -18,6 +19,7 @@ public class UserResponseDto {
   private String firstName;
   private String lastName;
   private String email;
+  private Set<String> groups;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
 }

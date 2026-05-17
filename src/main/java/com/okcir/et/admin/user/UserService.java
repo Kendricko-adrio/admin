@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,12 +35,22 @@ public class UserService {
           "Email '" + request.getEmail() + "' is already registered");
     }
 
+    String groupName = request.getGroup();
+    if (groupName == null || groupName.isBlank()) {
+      throw new IllegalArgumentException("Group name is required");
+    }
+
+    Group group = groupRepository.findByName(groupName)
+        .orElseThrow(() -> new ResourceNotFoundException(
+            "Group not found with name: " + groupName));
+
     User user = User.builder()
         .username(request.getUsername())
         .firstName(request.getFirstName())
         .lastName(request.getLastName())
         .email(request.getEmail())
         .build();
+    user.getGroups().add(group);
 
     User saved = userRepository.save(user);
     return toResponseDto(saved);
@@ -96,6 +107,14 @@ public class UserService {
     user.setLastName(request.getLastName());
     user.setEmail(request.getEmail());
 
+    String groupName = request.getGroup();
+    if (groupName != null && !groupName.isBlank()) {
+      Group group = groupRepository.findByName(groupName)
+          .orElseThrow(() -> new ResourceNotFoundException(
+              "Group not found with name: " + groupName));
+      user.setGroups(new HashSet<>(Set.of(group)));
+    }
+
     User updated = userRepository.save(user);
     return toResponseDto(updated);
   }
@@ -138,12 +157,19 @@ public class UserService {
   // ── Mapper ───────────────────────────────────────────
 
   private UserResponseDto toResponseDto(User user) {
+    Set<String> groupNames = user.getGroups() == null
+        ? new HashSet<>()
+        : user.getGroups().stream()
+            .map(Group::getName)
+            .collect(Collectors.toSet());
+
     return UserResponseDto.builder()
         .id(user.getId())
         .username(user.getUsername())
         .firstName(user.getFirstName())
         .lastName(user.getLastName())
         .email(user.getEmail())
+        .groups(groupNames)
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())
         .build();
