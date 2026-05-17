@@ -1,7 +1,8 @@
-package com.okcir.et.admin.group;
+package com.okcir.et.admin.account;
 
-import com.okcir.et.admin.accessright.AccessRight;
-import com.okcir.et.admin.account.Account;
+import com.okcir.et.admin.group.Group;
+import com.okcir.et.admin.settlementinstruction.SettlementInstruction;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -12,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,14 +29,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "groups")
+@Table(name = "accounts")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"accessRights", "accounts"})
-public class Group {
+@EqualsAndHashCode(exclude = {"settlementInstructions", "groups"})
+public class Account {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,14 +45,20 @@ public class Group {
   @Column(nullable = false, unique = true, length = 100)
   private String name;
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "group_access_rights", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "access_right_id"))
-  @Builder.Default
-  private Set<AccessRight> accessRights = new HashSet<>();
+  @Column(length = 255)
+  private String description;
 
-  @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
+  @Column(length = 100)
+  private String counterparty;
+
+  @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   @Builder.Default
-  private Set<Account> accounts = new HashSet<>();
+  private Set<SettlementInstruction> settlementInstructions = new HashSet<>();
+
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "group_accounts", joinColumns = @JoinColumn(name = "account_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
+  @Builder.Default
+  private Set<Group> groups = new HashSet<>();
 
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)

@@ -3,6 +3,9 @@ package com.okcir.et.admin.group;
 import com.okcir.et.admin.accessright.AccessRight;
 import com.okcir.et.admin.accessright.AccessRightRepository;
 import com.okcir.et.admin.accessright.dto.AccessRightResponseDto;
+import com.okcir.et.admin.account.Account;
+import com.okcir.et.admin.account.AccountRepository;
+import com.okcir.et.admin.account.dto.AccountSummaryDto;
 import com.okcir.et.admin.common.exception.DuplicateResourceException;
 import com.okcir.et.admin.common.exception.ResourceNotFoundException;
 import com.okcir.et.admin.group.dto.GroupRequestDto;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +25,7 @@ public class GroupService {
 
   private final GroupRepository groupRepository;
   private final AccessRightRepository accessRightRepository;
+  private final AccountRepository accountRepository;
 
   // ── CREATE ───────────────────────────────────────────
 
@@ -32,10 +37,12 @@ public class GroupService {
     }
 
     Set<AccessRight> accessRights = resolveAccessRights(request.getAccessRightIds());
+    Set<Account> accounts = resolveAccounts(request.getAccountIds());
 
     Group group = Group.builder()
         .name(request.getName())
         .accessRights(accessRights)
+        .accounts(accounts)
         .build();
 
     Group saved = groupRepository.save(group);
@@ -64,12 +71,24 @@ public class GroupService {
     }
 
     Set<AccessRight> accessRights = resolveAccessRights(request.getAccessRightIds());
+    Set<Account> accounts = resolveAccounts(request.getAccountIds());
 
     group.setName(request.getName());
     group.setAccessRights(accessRights);
+    group.setAccounts(accounts);
 
     Group updated = groupRepository.save(group);
     return toResponseDto(updated);
+  }
+
+  // ── DELETE ───────────────────────────────────────────
+
+  @Transactional
+  public void deleteGroup(Long id) {
+    if (!groupRepository.existsById(id)) {
+      throw new ResourceNotFoundException("Group", id);
+    }
+    groupRepository.deleteById(id);
   }
 
   // ── Helpers ──────────────────────────────────────────
@@ -82,15 +101,29 @@ public class GroupService {
     List<AccessRight> found = accessRightRepository.findAllById(accessRightIds);
 
     if (found.size() != accessRightIds.size()) {
-      // Find which IDs are missing
-      Set<Long> foundIds = new HashSet<>();
-      for (AccessRight ar : found) {
-        foundIds.add(ar.getId());
-      }
+      Set<Long> foundIds = found.stream().map(AccessRight::getId).collect(Collectors.toSet());
       Set<Long> missingIds = new HashSet<>(accessRightIds);
       missingIds.removeAll(foundIds);
       throw new ResourceNotFoundException(
           "Access Right(s) not found with id(s): " + missingIds);
+    }
+
+    return new HashSet<>(found);
+  }
+
+  private Set<Account> resolveAccounts(Set<Long> accountIds) {
+    if (accountIds == null || accountIds.isEmpty()) {
+      return new HashSet<>();
+    }
+
+    List<Account> found = accountRepository.findAllById(accountIds);
+
+    if (found.size() != accountIds.size()) {
+      Set<Long> foundIds = found.stream().map(Account::getId).collect(Collectors.toSet());
+      Set<Long> missingIds = new HashSet<>(accountIds);
+      missingIds.removeAll(foundIds);
+      throw new ResourceNotFoundException(
+          "Account(s) not found with id(s): " + missingIds);
     }
 
     return new HashSet<>(found);
@@ -109,10 +142,18 @@ public class GroupService {
             .build())
         .toList();
 
+    List<AccountSummaryDto> accountDtos = group.getAccounts().stream()
+        .map(a -> AccountSummaryDto.builder()
+            .id(a.getId())
+            .name(a.getName())
+            .build())
+        .toList();
+
     return GroupResponseDto.builder()
         .id(group.getId())
         .name(group.getName())
         .accessRights(accessRightDtos)
+        .accounts(accountDtos)
         .createdAt(group.getCreatedAt())
         .updatedAt(group.getUpdatedAt())
         .build();
