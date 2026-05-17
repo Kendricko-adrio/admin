@@ -1,7 +1,7 @@
-package com.okcir.et.admin.group;
+package com.okcir.et.admin.settlementinstruction;
 
-import com.okcir.et.admin.accessright.AccessRight;
 import com.okcir.et.admin.account.Account;
+import com.okcir.et.admin.currency.Currency;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -10,47 +10,44 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
-@Table(name = "groups")
+@Table(name = "settlement_instructions")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(exclude = {"accessRights", "accounts"})
-public class Group {
+public class SettlementInstruction {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true, length = 100)
-  private String name;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "account_id", nullable = false)
+  private Account account;
 
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "group_access_rights", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "access_right_id"))
-  @Builder.Default
-  private Set<AccessRight> accessRights = new HashSet<>();
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "ccy_id", nullable = false)
+  private Currency currency;
 
-  @ManyToMany(mappedBy = "groups", fetch = FetchType.LAZY)
-  @Builder.Default
-  private Set<Account> accounts = new HashSet<>();
+  @Column(name = "settlement_number", nullable = false, unique = true, length = 100)
+  private String settlementNumber;
+
+  @Column(name = "is_default", nullable = false)
+  private Boolean isDefault;
 
   @CreatedDate
   @Column(name = "created_at", nullable = false, updatable = false)
